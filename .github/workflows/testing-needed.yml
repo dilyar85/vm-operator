@@ -2,12 +2,13 @@ name: testing-needed
 
 on:
   pull_request:
+    branches:
+    - main
+  workflow_run:
+    workflows:
+    - pr-labeler
     types:
-    - synchronize
-    - opened
-    - reopened
-    - labeled
-    - unlabeled
+    - completed
 
 jobs:
   check-label:
