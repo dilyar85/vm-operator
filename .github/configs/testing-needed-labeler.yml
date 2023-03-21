@@ -1,0 +1,4 @@
+version: 1
+labels:
+  - label: "testing-needed-e2e-fast"
+    size-above: 99

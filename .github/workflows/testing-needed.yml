@@ -1,16 +1,25 @@
 name: testing-needed
 
 on:
-  pull_request:
-    types:
-    - synchronize
-    - opened
-    - reopened
-    - labeled
-    - unlabeled
+- pull_request_target
 
 jobs:
+
+  add-label:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: srvaroa/labeler@v0.9
+      with:
+        config_path: .github/configs/testing-needed-labeler.yml
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
   check-label:
+    needs:
+    - add-label
     strategy:
       matrix:
         # the types of tests that are expressed as labels, ex. for the test
