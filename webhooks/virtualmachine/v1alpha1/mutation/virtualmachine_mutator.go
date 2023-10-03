@@ -199,6 +199,14 @@ func ResolveImageName(
 		return false, nil
 	}
 
+	// If the VM is already booted, the VM image name should have been resolved.
+	// No need to mutate in this case to avoid errors, such as after an upgrade,
+	// where the VM.spec.imageName still points to the old image name.
+	if _, ok := vm.Annotations[vmopv1.FirstBootDoneAnnotation]; ok {
+		return false, nil
+	}
+
+	var determinedImageName string
 	// Check if a single namespace scope image exists by the status name.
 	vmiList := &vmopv1.VirtualMachineImageList{}
 	if err := c.List(ctx, vmiList, client.InNamespace(vm.Namespace),
@@ -208,9 +216,13 @@ func ResolveImageName(
 	); err != nil {
 		return false, err
 	}
-	if len(vmiList.Items) == 1 {
-		vm.Spec.ImageName = vmiList.Items[0].Name
-		return true, nil
+	switch len(vmiList.Items) {
+	case 0:
+		break
+	case 1:
+		determinedImageName = vmiList.Items[0].Name
+	default:
+		return false, errors.Errorf("multiple VM images exist for %q in namespace scope", imageName)
 	}
 
 	// Check if a single cluster scope image exists by the status name.
@@ -220,12 +232,24 @@ func ResolveImageName(
 	}); err != nil {
 		return false, err
 	}
-	if len(cvmiList.Items) == 1 {
-		vm.Spec.ImageName = cvmiList.Items[0].Name
-		return true, nil
+	switch len(cvmiList.Items) {
+	case 0:
+		break
+	case 1:
+		if determinedImageName != "" {
+			return false, errors.Errorf("multiple VM images exist for %q in namespace and cluster scope", imageName)
+		}
+		determinedImageName = cvmiList.Items[0].Name
+	default:
+		return false, errors.Errorf("multiple VM images exist for %q in cluster scope", imageName)
 	}
 
-	return false, errors.Errorf("no single VM image exists for %q", imageName)
+	if determinedImageName == "" {
+		return false, errors.Errorf("no VM image exists for %q in namespace or cluster scope", imageName)
+	}
+
+	vm.Spec.ImageName = determinedImageName
+	return true, nil
 }
 
 // SetNextRestartTime sets spec.nextRestartTime for a VM if the field's
