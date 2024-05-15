@@ -12,6 +12,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 if ! make generate; then
   exit_code="${?}"
+  echo "exit code: ${exit_code}"
 
   # Please note the following heredoc uses leading tabs to allow
   # the contents to be indented with the if/fi statement. For

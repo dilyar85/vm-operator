@@ -253,6 +253,7 @@ modules-download: ## Downloads and caches the modules
 
 .PHONY: generate
 generate: ## Generate code
+	exit 1
 	$(MAKE) generate-go
 	$(MAKE) generate-manifests
 	$(MAKE) generate-external-manifests
