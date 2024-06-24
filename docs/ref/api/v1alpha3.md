@@ -681,6 +681,36 @@ key/value pair.
 
 Please note this field and Properties are mutually exclusive. |
 
+### VirtualMachineCdromSpec
+
+
+
+VirtualMachineCdromSpec describes the desired state of a CD-ROM device.
+
+_Appears in:_
+- [VirtualMachineSpec](#virtualmachinespec)
+
+| Field | Description |
+| --- | --- |
+| `name` _string_ | Name describes the unique name of this CD-ROM device. |
+| `image` _[VirtualMachineImageRef](#virtualmachineimageref)_ | Image describes the reference to the ISO type VirtualMachineImage or
+ClusterVirtualMachineImage resource used as the backing for the CD-ROM.
+
+
+Please note, unlike the field spec.imageName, the value of
+spec.cdrom.image.name MUST be a Kubernetes object name. |
+| `disconnect` _boolean_ | Disconnect describes the desired connection state of the CD-ROM device.
+
+
+When omitted or false, the CD-ROM device is added and connected to the
+VM. If the device already exists, it's updated to a connected state.
+
+
+When true, the CD-ROM device is added but remains disconnected from the
+VM. If the device already exists, it's updated to a disconnected state. |
+| `allowGuestControl` _boolean_ | AllowGuestControl enables guest control over whether the connectable
+device is connected. |
+
 ### VirtualMachineClassHardware
 
 
@@ -829,12 +859,14 @@ _Appears in:_
 
 
 _Appears in:_
+- [VirtualMachineCdromSpec](#virtualmachinecdromspec)
 - [VirtualMachineSpec](#virtualmachinespec)
 
 | Field | Description |
 | --- | --- |
 | `kind` _string_ | Kind describes the type of image, either a namespace-scoped
-VirtualMachineImage or cluster-scoped ClusterVirtualMachineImage. |
+VirtualMachineImage or cluster-scoped ClusterVirtualMachineImage.
+If omitted, the default value is VirtualMachineImage. |
 | `name` _string_ | Name refers to the name of a VirtualMachineImage resource in the same
 namespace as this VM or a cluster-scoped ClusterVirtualMachineImage. |
 
@@ -2040,6 +2072,14 @@ _Appears in:_
 
 | Field | Description |
 | --- | --- |
+| `cdrom` _[VirtualMachineCdromSpec](#virtualmachinecdromspec) array_ | Cdrom describes the desired state of the VM's CD-ROM devices.
+
+
+Each CD-ROM device requires a reference to an ISO-type
+VirtualMachineImage or ClusterVirtualMachineImage resource as backing.
+
+
+CD-ROM devices are attached to the VM in list-order. |
 | `image` _[VirtualMachineImageRef](#virtualmachineimageref)_ | Image describes the reference to the VirtualMachineImage or
 ClusterVirtualMachineImage resource used to deploy this VM.
 

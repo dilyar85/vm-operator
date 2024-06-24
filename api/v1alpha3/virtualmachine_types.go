@@ -227,17 +227,70 @@ const (
 )
 
 type VirtualMachineImageRef struct {
+	// +optional
+	// +kubebuilder:validation:Enum=VirtualMachineImage;ClusterVirtualMachineImage
+
 	// Kind describes the type of image, either a namespace-scoped
 	// VirtualMachineImage or cluster-scoped ClusterVirtualMachineImage.
+	// If omitted, the default value is VirtualMachineImage.
 	Kind string `json:"kind"`
+
+	// +required
 
 	// Name refers to the name of a VirtualMachineImage resource in the same
 	// namespace as this VM or a cluster-scoped ClusterVirtualMachineImage.
 	Name string `json:"name"`
 }
 
+// VirtualMachineCdromSpec describes the desired state of a CD-ROM device.
+type VirtualMachineCdromSpec struct {
+
+	// +required
+	// +kubebuilder:validation:Pattern="^[a-z0-9]{2,}$"
+
+	// Name describes the unique name of this CD-ROM device.
+	Name string `json:"name"`
+
+	// +required
+
+	// Image describes the reference to the ISO type VirtualMachineImage or
+	// ClusterVirtualMachineImage resource used as the backing for the CD-ROM.
+	//
+	// Please note, unlike the field spec.imageName, the value of
+	// spec.cdrom.image.name MUST be a Kubernetes object name.
+	Image *VirtualMachineImageRef `json:"image"`
+
+	// +optional
+
+	// Disconnect describes the desired connection state of the CD-ROM device.
+	//
+	// When omitted or false, the CD-ROM device is added and connected to the
+	// VM. If the device already exists, it's updated to a connected state.
+	//
+	// When true, the CD-ROM device is added but remains disconnected from the
+	// VM. If the device already exists, it's updated to a disconnected state.
+	Disconnect bool `json:"disconnect,omitempty"`
+
+	// +optional
+
+	// AllowGuestControl enables guest control over whether the connectable
+	// device is connected.
+	AllowGuestControl bool `json:"allowGuestControl,omitempty"`
+}
+
 // VirtualMachineSpec defines the desired state of a VirtualMachine.
 type VirtualMachineSpec struct {
+	// +optional
+	// +listType=map
+	// +listMapKey=name
+
+	// Cdrom describes the desired state of the VM's CD-ROM devices.
+	//
+	// Each CD-ROM device requires a reference to an ISO-type
+	// VirtualMachineImage or ClusterVirtualMachineImage resource as backing.
+	//
+	// CD-ROM devices are attached to the VM in list-order.
+	Cdrom []VirtualMachineCdromSpec `json:"cdrom,omitempty"`
 
 	// +optional
 

@@ -986,6 +986,76 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      cdrom:
+                        description: |-
+                          Cdrom describes the desired state of the VM's CD-ROM devices.
+
+
+                          Each CD-ROM device requires a reference to an ISO-type
+                          VirtualMachineImage or ClusterVirtualMachineImage resource as backing.
+
+
+                          CD-ROM devices are attached to the VM in list-order.
+                        items:
+                          description: VirtualMachineCdromSpec describes the desired
+                            state of a CD-ROM device.
+                          properties:
+                            allowGuestControl:
+                              description: |-
+                                AllowGuestControl enables guest control over whether the connectable
+                                device is connected.
+                              type: boolean
+                            disconnect:
+                              description: |-
+                                Disconnect describes the desired connection state of the CD-ROM device.
+
+
+                                When omitted or false, the CD-ROM device is added and connected to the
+                                VM. If the device already exists, it's updated to a connected state.
+
+
+                                When true, the CD-ROM device is added but remains disconnected from the
+                                VM. If the device already exists, it's updated to a disconnected state.
+                              type: boolean
+                            image:
+                              description: |-
+                                Image describes the reference to the ISO type VirtualMachineImage or
+                                ClusterVirtualMachineImage resource used as the backing for the CD-ROM.
+
+
+                                Please note, unlike the field spec.imageName, the value of
+                                spec.cdrom.image.name MUST be a Kubernetes object name.
+                              properties:
+                                kind:
+                                  description: |-
+                                    Kind describes the type of image, either a namespace-scoped
+                                    VirtualMachineImage or cluster-scoped ClusterVirtualMachineImage.
+                                    If omitted, the default value is VirtualMachineImage.
+                                  enum:
+                                  - VirtualMachineImage
+                                  - ClusterVirtualMachineImage
+                                  type: string
+                                name:
+                                  description: |-
+                                    Name refers to the name of a VirtualMachineImage resource in the same
+                                    namespace as this VM or a cluster-scoped ClusterVirtualMachineImage.
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            name:
+                              description: Name describes the unique name of this
+                                CD-ROM device.
+                              pattern: ^[a-z0-9]{2,}$
+                              type: string
+                          required:
+                          - image
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
                       className:
                         description: |-
                           ClassName describes the name of the VirtualMachineClass resource used to
@@ -1044,6 +1114,10 @@ spec:
                             description: |-
                               Kind describes the type of image, either a namespace-scoped
                               VirtualMachineImage or cluster-scoped ClusterVirtualMachineImage.
+                              If omitted, the default value is VirtualMachineImage.
+                            enum:
+                            - VirtualMachineImage
+                            - ClusterVirtualMachineImage
                             type: string
                           name:
                             description: |-
@@ -1051,7 +1125,6 @@ spec:
                               namespace as this VM or a cluster-scoped ClusterVirtualMachineImage.
                             type: string
                         required:
-                        - kind
                         - name
                         type: object
                       imageName:

@@ -583,6 +583,14 @@ func (s *Session) prePowerOnVMConfigSpec(
 	}
 	configSpec.DeviceChange = append(configSpec.DeviceChange, pciDeviceChanges...)
 
+	if pkgcfg.FromContext(vmCtx).Features.IsoSupport {
+		cdromDeviceChanges, err := vmutil.UpdateCdromDeviceChanges(vmCtx, s.K8sClient, virtualDevices)
+		if err != nil {
+			return nil, err
+		}
+		configSpec.DeviceChange = append(configSpec.DeviceChange, cdromDeviceChanges...)
+	}
+
 	return configSpec, nil
 }
 
@@ -821,6 +829,13 @@ func (s *Session) poweredOnVMReconfigure(
 
 	UpdateConfigSpecExtraConfig(vmCtx, config, configSpec, nil, nil, nil, nil)
 	UpdateConfigSpecChangeBlockTracking(vmCtx, config, configSpec, nil, vmCtx.VM.Spec)
+
+	if pkgcfg.FromContext(vmCtx).Features.IsoSupport {
+		if err := vmutil.UpdateConfigSpecCdromDeviceConnection(vmCtx, s.K8sClient, config, configSpec); err != nil {
+			vmCtx.Logger.Error(err, "Failed to update CD-ROM device connection")
+			return false, err
+		}
+	}
 
 	var refetchProps bool
 
