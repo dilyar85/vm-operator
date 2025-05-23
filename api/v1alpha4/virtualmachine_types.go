@@ -793,6 +793,20 @@ type VirtualMachineSpec struct {
 	//
 	// Defaults to Online.
 	PromoteDisksMode VirtualMachinePromoteDisksMode `json:"promoteDisksMode,omitempty"`
+
+	// +optional
+
+	// GroupName describes the name of a VirtualMachineGroup resource used to
+	// manage this VM and other VMs / VM groups together as a collective group.
+	//
+	// When managed by a group:
+	//
+	// - All placement / mobility operations are executed in the context of the
+	//   group.
+	// - An OwnerReference is placed on the VM that points to the group.
+	// - Deleting the group will delete the VM.
+	// - Deleting the VM will be blocked as long as it is managed by a group.
+	GroupName string `json:"groupName,omitempty"`
 }
 
 // VirtualMachineReservedSpec describes a set of VM configuration options

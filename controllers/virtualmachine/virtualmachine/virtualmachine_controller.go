@@ -1,5 +1,5 @@
 // © Broadcom. All Rights Reserved.
-// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
 package virtualmachine
@@ -413,6 +413,16 @@ func requeueDelay(
 		return pkgcfg.FromContext(ctx).CreateVMRequeueDelay
 	}
 
+	// Requeue if the VM is scheduled to change power state.
+	if ctx.VM.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation] != "" {
+		scheduledTime, err := time.Parse(time.RFC3339Nano, ctx.VM.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation])
+		if err != nil {
+			ctx.Logger.Error(err, "Failed to parse scheduled power state time", "scheduledTime", scheduledTime)
+			return 0
+		}
+		return time.Until(scheduledTime)
+	}
+
 	// Do not requeue for the IP address if async signal is enabled.
 	if pkgcfg.FromContext(ctx).AsyncSignalEnabled {
 		return 0
@@ -520,6 +530,24 @@ func (r *Reconciler) ReconcileNormal(ctx *pkgctx.VirtualMachineContext) (reterr 
 
 	// Upgrade schema fields where needed
 	upgradeSchema(ctx)
+
+	// Update the power state of the VM if scheduled from the VM Group.
+	if val, ok := ctx.VM.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation]; ok {
+		scheduledTime, err := time.Parse(time.RFC3339Nano, val)
+		if err != nil {
+			ctx.Logger.Error(err, "Failed to parse scheduled power state time from annotation",
+				"annotationKey", vmopv1.ScheduledPowerStateTimeAnnotation,
+				"annotationValue", val)
+			return err
+		}
+
+		if time.Now().After(scheduledTime) {
+			ctx.VM.Spec.PowerState = vmopv1.VirtualMachinePowerState(ctx.VM.Annotations[vmopv1.ScheduledPowerStateAnnotation])
+			delete(ctx.VM.Annotations, vmopv1.ScheduledPowerStateTimeAnnotation)
+			delete(ctx.VM.Annotations, vmopv1.ScheduledPowerStateAnnotation)
+			ctx.Logger.Info("Power state updated due to scheduled power state change from group", "powerState", ctx.VM.Spec.PowerState)
+		}
+	}
 
 	if pkgcfg.FromContext(ctx).Features.FastDeploy {
 		// Do not proceed unless the VMI cache this VM needs is ready.
@@ -715,4 +743,30 @@ func (r *Reconciler) isVMICacheReady(ctx *pkgctx.VirtualMachineContext) bool {
 	delete(ctx.VM.Annotations, pkgconst.VMICacheLocationAnnotationKey)
 
 	return true
+}
+
+// reconcilePowerState reconciles the power state of a Virtual Machine as per the diagram.
+// It compares the current power state with the desired power state and updates via the VM provider
+// if needed.
+func (r *Reconciler) reconcilePowerState(ctx *pkgctx.VirtualMachineContext) error {
+	// Only proceed if VM has a desired power state
+	if ctx.VM.Spec.PowerState == "" {
+		return nil
+	}
+
+	// Get current power state
+	currentPowerState := ctx.VM.Status.PowerState
+	desiredPowerState := ctx.VM.Spec.PowerState
+
+	// Check if power state needs to be updated
+	if currentPowerState != desiredPowerState {
+		ctx.Logger.Info("Power state change detected",
+			"current", currentPowerState,
+			"desired", desiredPowerState)
+
+		// The actual power state update happens in CreateOrUpdateVirtualMachine
+		// which is called later in the reconciliation process
+	}
+
+	return nil
 }

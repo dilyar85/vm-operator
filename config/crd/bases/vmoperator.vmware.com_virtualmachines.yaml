@@ -1769,6 +1769,7 @@ spec:
                                 description: Metric is the weight/priority of the
                                   route.
                                 format: int32
+                                minimum: 1
                                 type: integer
                               to:
                                 description: To is an IP4 or IP6 address.
@@ -1777,7 +1778,6 @@ spec:
                                 description: Via is an IP4 or IP6 address.
                                 type: string
                             required:
-                            - metric
                             - to
                             - via
                             type: object
@@ -4318,6 +4318,7 @@ spec:
                                 description: Metric is the weight/priority of the
                                   route.
                                 format: int32
+                                minimum: 1
                                 type: integer
                               to:
                                 description: To is an IP4 or IP6 address.
@@ -4326,7 +4327,6 @@ spec:
                                 description: Via is an IP4 or IP6 address.
                                 type: string
                             required:
-                            - metric
                             - to
                             - via
                             type: object
@@ -6584,6 +6584,19 @@ spec:
                       Defaults to true if omitted.
                     type: boolean
                 type: object
+              groupName:
+                description: |-
+                  GroupName describes the name of a VirtualMachineGroup resource used to
+                  manage this VM and other VMs / VM groups together as a collective group.
+
+                  When managed by a group:
+
+                  - All placement / mobility operations are executed in the context of the
+                    group.
+                  - An OwnerReference is placed on the VM that points to the group.
+                  - Deleting the group will delete the VM.
+                  - Deleting the VM will be blocked as long as it is managed by a group.
+                type: string
               guestID:
                 description: |-
                   GuestID describes the desired guest operating system identifier for a VM.
@@ -6965,6 +6978,7 @@ spec:
                                 description: Metric is the weight/priority of the
                                   route.
                                 format: int32
+                                minimum: 1
                                 type: integer
                               to:
                                 description: To is an IP4 or IP6 address.
@@ -6973,7 +6987,6 @@ spec:
                                 description: Via is an IP4 or IP6 address.
                                 type: string
                             required:
-                            - metric
                             - to
                             - via
                             type: object

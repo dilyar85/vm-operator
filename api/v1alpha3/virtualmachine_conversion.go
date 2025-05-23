@@ -73,6 +73,7 @@ func (src *VirtualMachine) ConvertTo(dstRaw ctrlconversion.Hub) error {
 
 	restore_v1alpha4_VirtualMachineBootstrapCloudInitWaitOnNetwork(dst, restored)
 	restore_v1alpha4_VirtualMachinePromoteDisksMode(dst, restored)
+	restore_v1alpha4_VirtualMachineGroupName(dst, restored)
 
 	// END RESTORE
 
@@ -116,4 +117,8 @@ func restore_v1alpha4_VirtualMachineBootstrapCloudInitWaitOnNetwork(dst, src *vm
 			}
 		}
 	}
+}
+
+func restore_v1alpha4_VirtualMachineGroupName(dst, src *vmopv1.VirtualMachine) {
+	dst.Spec.GroupName = src.Spec.GroupName
 }

@@ -1000,13 +1000,18 @@ func unitTestsValidateCreate() {
 						ctx.vm.Annotations[vmopv1.RestoredVMAnnotation] = dummyRegisteredAnnVal
 						ctx.vm.Annotations[vmopv1.ImportedVMAnnotation] = dummyImportedAnnVal
 						ctx.vm.Annotations[vmopv1.FailedOverVMAnnotation] = dummyFailedOverAnnVal
+						ctx.vm.Annotations[vmopv1.ScheduledPowerStateAnnotation] = string(vmopv1.VirtualMachinePowerStateOn)
+						ctx.vm.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation] = time.Now().Format(time.RFC3339Nano)
 					},
 					validate: doValidateWithMsg(
 						field.Forbidden(annotationPath.Key(vmopv1.RestoredVMAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
 						field.Forbidden(annotationPath.Key(vmopv1.ImportedVMAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
 						field.Forbidden(annotationPath.Key(vmopv1.FailedOverVMAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
 						field.Forbidden(annotationPath.Key(vmopv1.InstanceIDAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
-						field.Forbidden(annotationPath.Key(vmopv1.FirstBootDoneAnnotation), "modifying this annotation is not allowed for non-admin users").Error()),
+						field.Forbidden(annotationPath.Key(vmopv1.FirstBootDoneAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
+						field.Forbidden(annotationPath.Key(vmopv1.ScheduledPowerStateAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
+						field.Forbidden(annotationPath.Key(vmopv1.ScheduledPowerStateTimeAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
+					),
 				},
 			),
 			Entry("should allow creating VM with admin-only annotations set by service user",
@@ -2876,6 +2881,8 @@ func unitTestsValidateUpdate() {
 						ctx.oldVM.Annotations[vmopv1.RestoredVMAnnotation] = dummyRegisteredAnnVal
 						ctx.oldVM.Annotations[vmopv1.ImportedVMAnnotation] = dummyImportedAnnVal
 						ctx.oldVM.Annotations[vmopv1.FailedOverVMAnnotation] = dummyFailedOverAnnVal
+						ctx.oldVM.Annotations[vmopv1.ScheduledPowerStateAnnotation] = string(vmopv1.VirtualMachinePowerStateOn)
+						ctx.oldVM.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation] = time.Now().Format(time.RFC3339Nano)
 
 						ctx.vm.Annotations[vmopv1.InstanceIDAnnotation] = dummyInstanceIDVal + updateSuffix
 						ctx.vm.Annotations[vmopv1.FirstBootDoneAnnotation] = dummyFirstBootDoneVal + updateSuffix
@@ -2884,6 +2891,8 @@ func unitTestsValidateUpdate() {
 						ctx.vm.Annotations[vmopv1.RestoredVMAnnotation] = dummyRegisteredAnnVal + updateSuffix
 						ctx.vm.Annotations[vmopv1.ImportedVMAnnotation] = dummyImportedAnnVal + updateSuffix
 						ctx.vm.Annotations[vmopv1.FailedOverVMAnnotation] = dummyFailedOverAnnVal + updateSuffix
+						ctx.vm.Annotations[vmopv1.ScheduledPowerStateAnnotation] = string(vmopv1.VirtualMachinePowerStateOff)
+						ctx.vm.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation] = time.Now().Add(time.Second).Format(time.RFC3339Nano)
 					},
 					validate: doValidateWithMsg(
 						field.Forbidden(annotationPath.Key(vmopv1.InstanceIDAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
@@ -2893,6 +2902,8 @@ func unitTestsValidateUpdate() {
 						field.Forbidden(annotationPath.Key(vmopv1.RestoredVMAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
 						field.Forbidden(annotationPath.Key(vmopv1.ImportedVMAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
 						field.Forbidden(annotationPath.Key(vmopv1.FailedOverVMAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
+						field.Forbidden(annotationPath.Key(vmopv1.ScheduledPowerStateAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
+						field.Forbidden(annotationPath.Key(vmopv1.ScheduledPowerStateTimeAnnotation), "modifying this annotation is not allowed for non-admin users").Error(),
 					),
 				},
 			),

@@ -254,6 +254,7 @@ func TestVirtualMachineConversion(t *testing.T) {
 					},
 				},
 				PromoteDisksMode: vmopv1.VirtualMachinePromoteDisksModeOffline,
+				GroupName: "my-vm-group",
 			},
 		}
 
@@ -284,5 +285,16 @@ func TestVirtualMachineConversion(t *testing.T) {
 			},
 		}
 		hubSpokeHub(g, &hub2, &vmopv1.VirtualMachine{}, &vmopv1a3.VirtualMachine{})
+	})
+
+	t.Run("VirtualMachine hub-spoke-hub with group name", func(t *testing.T) {
+		g := NewWithT(t)
+
+		hub := vmopv1.VirtualMachine{
+			Spec: vmopv1.VirtualMachineSpec{
+				GroupName: "my-vm-group",
+			},
+		}
+		hubSpokeHub(g, &hub, &vmopv1.VirtualMachine{}, &vmopv1a3.VirtualMachine{})
 	})
 }

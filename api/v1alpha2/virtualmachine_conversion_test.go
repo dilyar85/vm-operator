@@ -257,6 +257,7 @@ func TestVirtualMachineConversion(t *testing.T) {
 					},
 				},
 				PromoteDisksMode: vmopv1.VirtualMachinePromoteDisksModeOffline,
+				GroupName: "my-vm-group",
 			},
 		}
 

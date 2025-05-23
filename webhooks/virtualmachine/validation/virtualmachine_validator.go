@@ -1382,6 +1382,14 @@ func (v validator) validateAnnotation(ctx *pkgctx.WebhookRequestContext, vm, old
 		allErrs = append(allErrs, field.Forbidden(annotationPath.Key(vmopv1.ImportedVMAnnotation), modifyAnnotationNotAllowedForNonAdmin))
 	}
 
+	if vm.Annotations[vmopv1.ScheduledPowerStateAnnotation] != oldVM.Annotations[vmopv1.ScheduledPowerStateAnnotation] {
+		allErrs = append(allErrs, field.Forbidden(annotationPath.Key(vmopv1.ScheduledPowerStateAnnotation), modifyAnnotationNotAllowedForNonAdmin))
+	}
+
+	if vm.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation] != oldVM.Annotations[vmopv1.ScheduledPowerStateTimeAnnotation] {
+		allErrs = append(allErrs, field.Forbidden(annotationPath.Key(vmopv1.ScheduledPowerStateTimeAnnotation), modifyAnnotationNotAllowedForNonAdmin))
+	}
+
 	// The following annotations will be added by the mutation webhook upon VM creation.
 	if !reflect.DeepEqual(oldVM, &vmopv1.VirtualMachine{}) {
 		if vm.Annotations[pkgconst.CreatedAtBuildVersionAnnotationKey] != oldVM.Annotations[pkgconst.CreatedAtBuildVersionAnnotationKey] {
